@@ -1,9 +1,13 @@
+import lexico.LinkedList;
+import lexico.Token;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 public class AnalizadorSistemas {
 
@@ -14,8 +18,21 @@ public class AnalizadorSistemas {
         String archivoEntrada = "entrada.txt";
         String archivoSalida = "salida_limpia.txt";
 
-        preprocesarArchivo(archivoEntrada, archivoSalida);
-        recorrerArchivo(archivoSalida);
+        List<Token> tokens = new ArrayList<Token>();
+        for  (int i = 0; i < 10; i++) {
+            tokens.add(new Token(i));
+        }
+
+        LinkedList list = new LinkedList(null);
+        list.agregarNodoInicio(tokens.get(4));
+        list.agregarNodoInicio(tokens.get(6));
+        list.agregarNodoInicio(tokens.get(8));
+        list.agregarNodoInicio(tokens.get(9));
+        list.printList();
+        list.debug();
+
+//        preprocesarArchivo(archivoEntrada, archivoSalida);
+//        recorrerArchivo(archivoSalida);
     }
 
     public static void preprocesarArchivo(String rutaOrigen, String rutaDestino) {
