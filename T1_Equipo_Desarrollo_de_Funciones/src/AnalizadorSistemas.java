@@ -1,4 +1,5 @@
 import lexico.LinkedList;
+import lexico.Nodo;
 import lexico.Token;
 
 import java.io.BufferedReader;
@@ -25,11 +26,24 @@ public class AnalizadorSistemas {
 
         LinkedList list = new LinkedList(null);
         list.agregarNodoInicio(tokens.get(4));
-        list.agregarNodoInicio(tokens.get(6));
-        list.agregarNodoInicio(tokens.get(8));
+        list.agregarNodoFinal(tokens.get(1));
+        list.agregarNodoFinal(tokens.get(3));
         list.agregarNodoInicio(tokens.get(9));
         list.printList();
-        list.debug();
+        System.out.println("No de Tokens " + list.count);
+        Nodo head = list.obtenerHead();
+        Nodo tail = list.obtenerTail();
+        System.out.println("Head -> " + head.data.value);
+        System.out.println("Tail -> " + tail.data.value);
+//        list.borrarNodoInicial();
+        list.borrarNodoFinal();
+        System.out.println("Eliminando " + tail.data.value);
+//        list.agregarNodoPos(tokens.get(2), 2);
+        list.printList();
+        System.out.println("No de Tokens " + list.count);
+        tail = list.obtenerTail();
+        System.out.println("new Tail -> " + tail.data.value);
+//        list.debug();
 
 //        preprocesarArchivo(archivoEntrada, archivoSalida);
 //        recorrerArchivo(archivoSalida);

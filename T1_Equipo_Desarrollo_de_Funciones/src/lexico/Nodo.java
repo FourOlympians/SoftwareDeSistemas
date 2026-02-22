@@ -2,7 +2,7 @@ package lexico;
 
 public class Nodo {
     Nodo prev;
-    Token data;
+    public Token data;
     Nodo next;
 
     public Nodo(Token t, Nodo prev, Nodo next) {
