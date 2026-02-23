@@ -10,7 +10,13 @@ public class Nodo {
         this.prev = prev;
         this.next = next;
     }
+
+    public Nodo obtenerSiguiente() {
+        return this.next;
+    }
+
+    public Nodo obtenerAnterior() {
+        return this.prev;
+    }
 }
-
-
 

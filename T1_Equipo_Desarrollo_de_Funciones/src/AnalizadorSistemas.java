@@ -1,6 +1,8 @@
+
 import lexico.LinkedList;
 import lexico.Nodo;
 import lexico.Token;
+import lexico.AnalizadorLexico;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,50 +10,42 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 
 public class AnalizadorSistemas {
 
     public static void main(String[] args) {
-       //AQUI PUEDEN CAMBIAR LOS NOMBRE POR RUTAS PARA SUS CASOS
-        //O PUEDEN PONERLE NOMBRE PERO METAN EL ARCHIVO AL PROYECTO
-        // FIERRO
+
         String archivoEntrada = "entrada.txt";
         String archivoSalida = "salida_limpia.txt";
 
-        List<Token> tokens = new ArrayList<Token>();
-        for  (int i = 0; i < 10; i++) {
-            tokens.add(new Token(i));
+        // PREPROCESAR ARCHIVO (quita comentarios y espacios)
+        preprocesarArchivo(archivoEntrada, archivoSalida);
+
+        // EJECUTAR ANALIZADOR LEXICO
+        LinkedList tabla = AnalizadorLexico.analizar(archivoSalida);
+
+        // MOSTRAR TABLA DE SIMBOLOS
+        System.out.println("\n===== TABLA DE SIMBOLOS =====");
+
+        Nodo tmp = tabla.obtenerHead();
+
+        if (tmp == null) {
+            System.out.println("No se encontraron tokens");
+            return;
         }
 
-        LinkedList list = new LinkedList(null);
-        list.agregarNodoInicio(tokens.get(4));
-        list.agregarNodoFinal(tokens.get(1));
-        list.agregarNodoFinal(tokens.get(3));
-        list.agregarNodoInicio(tokens.get(9));
-        list.printList();
-        System.out.println("No de Tokens " + list.count);
-        Nodo head = list.obtenerHead();
-        Nodo tail = list.obtenerTail();
-        System.out.println("Head -> " + head.data.value);
-        System.out.println("Tail -> " + tail.data.value);
-//        list.borrarNodoInicial();
-        list.borrarNodoFinal();
-        System.out.println("Eliminando " + tail.data.value);
-//        list.agregarNodoPos(tokens.get(2), 2);
-        list.printList();
-        System.out.println("No de Tokens " + list.count);
-        tail = list.obtenerTail();
-        System.out.println("new Tail -> " + tail.data.value);
-//        list.debug();
+        while (tmp != null) {
+            System.out.println(tmp.data);
+            tmp = tmp.obtenerSiguiente();
+        }
 
-//        preprocesarArchivo(archivoEntrada, archivoSalida);
-//        recorrerArchivo(archivoSalida);
+        System.out.println("Total de tokens: " + tabla.count);
     }
+
 
     public static void preprocesarArchivo(String rutaOrigen, String rutaDestino) {
         File archivo = new File(rutaOrigen);
-        
+
         if (!archivo.exists()) {
             System.err.println("Error: El archivo de origen no existe.");
             return;
@@ -64,12 +58,10 @@ public class AnalizadorSistemas {
             boolean enComentarioBloque = false;
 
             while ((linea = br.readLine()) != null) {
-                // Eliminar tabuladores y espacios en los extremos
                 linea = linea.trim();
 
                 if (linea.isEmpty()) continue;
 
-                // Salto de comentarios de bloque
                 if (linea.contains("/*")) {
                     enComentarioBloque = true;
                 }
@@ -80,14 +72,11 @@ public class AnalizadorSistemas {
                     continue;
                 }
 
-                // Salto de comentarios de línea
                 if (linea.startsWith("//")) continue;
 
-                // Eliminación manual de espacios y tabuladores
                 String lineaProcesada = "";
                 for (int i = 0; i < linea.length(); i++) {
                     char c = linea.charAt(i);
-                    // Solo agregamos el carácter si no es un espacio o tabulador
                     if (c != ' ' && c != '\t') {
                         lineaProcesada += c;
                     }
@@ -98,6 +87,7 @@ public class AnalizadorSistemas {
                     bw.newLine();
                 }
             }
+
             System.out.println("Archivo preprocesado con éxito.");
 
         } catch (IOException e) {
