@@ -1,0 +1,12 @@
+int x := 10
+float y := 3.
+string nombre := "hola mundo
+int z := @
+bool activo := 5
+write "resultado"
+int total := 100#
+float precio := 8.5
+string msg := "adios"
+do {
+    write z
+} while x <= 10
