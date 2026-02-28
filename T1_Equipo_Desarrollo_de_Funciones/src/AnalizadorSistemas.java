@@ -1,4 +1,3 @@
-
 import lexico.LinkedList;
 import lexico.Nodo;
 import lexico.Token;
@@ -40,6 +39,9 @@ public class AnalizadorSistemas {
         }
 
         System.out.println("Total de tokens: " + tabla.count);
+
+        // MOSTRAR TABLA DE ERRORES
+        AnalizadorLexico.tablaErrores.imprimir();
     }
 
 
@@ -77,9 +79,13 @@ public class AnalizadorSistemas {
                 String lineaProcesada = "";
                 for (int i = 0; i < linea.length(); i++) {
                     char c = linea.charAt(i);
-                    if (c != ' ' && c != '\t') {
-                        lineaProcesada += c;
-                    }
+                    if (c == ' ' || c == '\t') {
+                        if (!lineaProcesada.isEmpty() && lineaProcesada.charAt(lineaProcesada.length() - 1) != ' ') {
+                            lineaProcesada += ' ';
+    }
+} else {
+    lineaProcesada += c;
+}
                 }
 
                 if (!lineaProcesada.isEmpty()) {
