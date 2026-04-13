@@ -1,0 +1,57 @@
+{
+  "languages": {
+    "Java": {
+      "formatter": "google-java-format",
+      "completion": true,
+      "inlay_hints": true
+    }
+  },
+  "lsp": {
+    "jdtls": {
+      "initialization_options": {
+        "workspace": "${workspaceRootFolder}",
+        "java_jdt_ls_download_url": "https://download.eclipse.org/jdtls/milestones/0.119.0/jdt-language-server-0.119.0.tar.gz",
+        "bundles": []
+      },
+      "settings": {
+        "java": {
+          "home": "/usr/lib/jvm/java-25-openjdk",
+          "jdt.ls.java.home": "/usr/lib/jvm/java-25-openjdk",
+          "jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2g -Xmx4g -Xms256m",
+          "configuration": {
+            "runtimes": [
+              {
+                "name": "JavaSE-24",
+                "path": "/usr/lib/jvm/java-24-openjdk",
+                "default": true
+              },
+              {
+                "name": "JavaSE-25",
+                "path": "/usr/lib/jvm/java-25-openjdk"
+              }
+            ]
+          },
+          "formatting": {
+            "enabled": true,
+            "profile": "GoogleStyle"
+          },
+          "import": {
+            "gradle": {
+              "enabled": false
+            },
+            "maven": {
+              "enabled": false
+            }
+          },
+          "maven": {
+            "enabled": false
+          }
+        }
+      },
+      "binary": {
+        "path": "/usr/local/bin/jdt-language-server.sh",
+        "args": ["-data", "${workspaceRootFolder}"]
+      }
+    }
+  }
+}

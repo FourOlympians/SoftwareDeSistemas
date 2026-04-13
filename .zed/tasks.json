@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Build",
+    "command": "javac -d out -sourcepath T1_Equipo_Desarrollo_de_Funciones/src T1_Equipo_Desarrollo_de_Funciones/src/AnalizadorSistemas.java T1_Equipo_Desarrollo_de_Funciones/src/lexico/*.java",
+    "description": "Compile Java source files to out/",
+    "tags": ["build", "compile"],
+    "dependencies": ["Clean"],
+    "workdir": ".",
+  },
+  {
+    "label": "Run",
+    "command": "java -cp out AnalizadorSistemas",
+    "description": "Run AnalizadorSistemas with entrada.txt",
+    "tags": ["run", "execute"],
+    "dependencies": ["Build"],
+    "workdir": ".",
+  },
+  {
+    "label": "Build (no clean)",
+    "command": "javac -d out -sourcepath T1_Equipo_Desarrollo_de_Funciones/src T1_Equipo_Desarrollo_de_Funciones/src/AnalizadorSistemas.java T1_Equipo_Desarrollo_de_Funciones/src/lexico/*.java",
+    "description": "Compile without cleaning first",
+    "tags": ["build", "compile"],
+    "workdir": ".",
+  },
+  {
+    "label": "Clean",
+    "command": "rm -rf out",
+    "description": "Remove compiled output directory",
+    "tags": ["clean"],
+    "workdir": ".",
+  },
+]

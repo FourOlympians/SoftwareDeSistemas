@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "name": "Debug AnalizadorSistemas",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "AnalizadorSistemas",
+      "classpath": "${workspaceFolder}/out",
+      "projectName": "SoftwareDeSistemas",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "args": "",
+      "sourcePaths": [
+        "${workspaceFolder}/T1_Equipo_Desarrollo_de_Funciones/src"
+      ],
+      "vmArgs": "-Xmx512m"
+    },
+    {
+      "name": "Debug AnalizadorSistemas (Remote)",
+      "type": "java",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 30000,
+      "projectName": "SoftwareDeSistemas",
+      "sourcePaths": [
+        "${workspaceFolder}/T1_Equipo_Desarrollo_de_Funciones/src"
+      ]
+    }
+  ]
+}
