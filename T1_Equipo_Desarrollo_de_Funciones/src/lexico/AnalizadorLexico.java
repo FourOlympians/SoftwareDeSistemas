@@ -10,24 +10,22 @@ public class AnalizadorLexico {
     public static TablaErrores tablaErrores = new TablaErrores();
 
     public static LinkedList analizar(String rutaArchivo) {
-
         LinkedList tabla = new LinkedList(null);
 
         // --- AGREGADO: reiniciar tabla en cada analisis ---
         tablaErrores = new TablaErrores();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-
+        try (
+            BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))
+        ) {
             String linea;
             int fila = 1;
 
             while ((linea = br.readLine()) != null) {
-
                 int i = 0;
                 int columna = 1;
 
                 while (i < linea.length()) {
-
                     // --- AGREGADO: saltar espacios sin registrarlos como error ---
                     if (Character.isWhitespace(linea.charAt(i))) {
                         i++;
@@ -38,7 +36,13 @@ public class AnalizadorLexico {
                     Token token;
 
                     // --- MODIFICADO: se agrega tablaErrores al llamado ---
-                    token = AutomataCadena.reconocer(linea, i, fila, columna, tablaErrores);
+                    token = AutomataCadena.reconocer(
+                        linea,
+                        i,
+                        fila,
+                        columna,
+                        tablaErrores
+                    );
                     if (token != null) {
                         tabla.agregarNodoFinal(token);
                         i += token.lexema.length();
@@ -54,7 +58,13 @@ public class AnalizadorLexico {
                     }
 
                     // --- MODIFICADO: se agrega tablaErrores al llamado ---
-                    token = AutomataNumero.reconocer(linea, i, fila, columna, tablaErrores);
+                    token = AutomataNumero.reconocer(
+                        linea,
+                        i,
+                        fila,
+                        columna,
+                        tablaErrores
+                    );
                     if (token != null) {
                         tabla.agregarNodoFinal(token);
                         i += token.lexema.length();
@@ -72,7 +82,12 @@ public class AnalizadorLexico {
                         continue;
                     }
 
-                    token = AutomataIdentificador.reconocer(linea, i, fila, columna);
+                    token = AutomataIdentificador.reconocer(
+                        linea,
+                        i,
+                        fila,
+                        columna
+                    );
                     if (token != null) {
                         tabla.agregarNodoFinal(token);
                         i += token.lexema.length();
@@ -95,7 +110,9 @@ public class AnalizadorLexico {
                         String.valueOf(charNoReconocido),
                         fila,
                         columna,
-                        "El caracter '" + charNoReconocido + "' no pertenece al lenguaje"
+                        "El caracter '" +
+                            charNoReconocido +
+                            "' no pertenece al lenguaje"
                     );
 
                     i++;
@@ -104,7 +121,6 @@ public class AnalizadorLexico {
 
                 fila++;
             }
-
         } catch (IOException e) {
             System.out.println("Error leyendo archivo");
         }

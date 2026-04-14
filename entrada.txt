@@ -1,12 +1,12 @@
 
 
 
-int main() {
-    print("hola mundo");
-    int x = 10;
+entero main() {
+    escribir("hola mundo");
+    entero x = 10;
 
     x++;
-    if ( x == 5 ) {
-        printf("%d es mayor a 5", &x);
+    si ( x == 5 ) {
+        escribir("%d es mayor a 5", &x);
     }
 }

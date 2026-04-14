@@ -8,17 +8,17 @@ public class AutomataIdentificador {
     private static final Set<String> reservadas = new HashSet<>();
 
     static {
-        reservadas.add("int");
-        reservadas.add("float");
-        reservadas.add("string");
-        reservadas.add("char");
-        reservadas.add("bool");
-        reservadas.add("if");
-        reservadas.add("else");
-        reservadas.add("do");
-        reservadas.add("while");
-        reservadas.add("read");
-        reservadas.add("write");
+        reservadas.add("entero");
+        reservadas.add("flotante");
+        reservadas.add("cadena");
+        reservadas.add("caracter");
+        reservadas.add("logico");
+        reservadas.add("si");
+        reservadas.add("sino");
+        reservadas.add("hacer");
+        reservadas.add("mientras");
+        reservadas.add("leer");
+        reservadas.add("escribir");
     }
 
     public static Token reconocer(String texto, int inicio, int fila, int columna) {
