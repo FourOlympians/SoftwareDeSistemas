@@ -1,19 +1,17 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import lexico.AnalizadorLexico;
 import lexico.LinkedList;
 import lexico.Nodo;
 import lexico.Token;
-import lexico.AnalizadorLexico;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.File;
-import java.io.IOException;
 
 public class AnalizadorSistemas {
 
     public static void main(String[] args) {
-
         String archivoEntrada = "entrada.txt";
         String archivoSalida = "salida_limpia.txt";
 
@@ -44,8 +42,10 @@ public class AnalizadorSistemas {
         AnalizadorLexico.tablaErrores.imprimir();
     }
 
-
-    public static void preprocesarArchivo(String rutaOrigen, String rutaDestino) {
+    public static void preprocesarArchivo(
+        String rutaOrigen,
+        String rutaDestino
+    ) {
         File archivo = new File(rutaOrigen);
 
         if (!archivo.exists()) {
@@ -53,9 +53,10 @@ public class AnalizadorSistemas {
             return;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(archivo));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(rutaDestino))) {
-
+        try (
+            BufferedReader br = new BufferedReader(new FileReader(archivo));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(rutaDestino))
+        ) {
             String linea;
             boolean enComentarioBloque = false;
 
@@ -80,12 +81,18 @@ public class AnalizadorSistemas {
                 for (int i = 0; i < linea.length(); i++) {
                     char c = linea.charAt(i);
                     if (c == ' ' || c == '\t') {
-                        if (!lineaProcesada.isEmpty() && lineaProcesada.charAt(lineaProcesada.length() - 1) != ' ') {
+                        if (
+                            !lineaProcesada.isEmpty() &&
+                            lineaProcesada.charAt(
+                                lineaProcesada.length() - 1
+                            ) !=
+                            ' '
+                        ) {
                             lineaProcesada += ' ';
-    }
-} else {
-    lineaProcesada += c;
-}
+                        }
+                    } else {
+                        lineaProcesada += c;
+                    }
                 }
 
                 if (!lineaProcesada.isEmpty()) {
@@ -95,7 +102,6 @@ public class AnalizadorSistemas {
             }
 
             System.out.println("Archivo preprocesado con éxito.");
-
         } catch (IOException e) {
             System.err.println("Error de lectura/escritura: " + e.getMessage());
         }
@@ -111,13 +117,17 @@ public class AnalizadorSistemas {
 
         try (FileReader fr = new FileReader(archivo)) {
             int caracter;
-            System.out.println("--- Iniciando lectura carácter por carácter ---");
+            System.out.println(
+                "--- Iniciando lectura carácter por carácter ---"
+            );
             while ((caracter = fr.read()) != -1) {
                 System.out.print((char) caracter);
             }
             System.out.println("\n--- Fin de la lectura ---");
         } catch (IOException e) {
-            System.err.println("Error al recorrer el archivo: " + e.getMessage());
+            System.err.println(
+                "Error al recorrer el archivo: " + e.getMessage()
+            );
         }
     }
 }

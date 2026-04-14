@@ -2,7 +2,7 @@ int main() {
 print("hola mundo");
 int x = 10;
 x++;
-if ( x >= 5 ) {
-print("X es mayor a 5");
+if ( x == 5 ) {
+printf("%d es mayor a 5", &x);
 }
 }
