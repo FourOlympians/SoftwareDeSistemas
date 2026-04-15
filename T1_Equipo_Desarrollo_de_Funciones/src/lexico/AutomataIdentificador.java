@@ -21,8 +21,12 @@ public class AutomataIdentificador {
         reservadas.add("escribir");
     }
 
-    public static Token reconocer(String texto, int inicio, int fila, int columna) {
-
+    public static Token reconocer(
+        String texto,
+        int inicio,
+        int fila,
+        int columna
+    ) {
         int i = inicio;
         String lexema = "";
 
@@ -34,7 +38,12 @@ public class AutomataIdentificador {
         }
 
         if (reservadas.contains(lexema)) {
-            return new Token(TipoToken.PALABRA_RESERVADA, lexema, fila, columna);
+            return new Token(
+                TipoToken.PALABRA_RESERVADA,
+                lexema,
+                fila,
+                columna
+            );
         }
 
         return new Token(TipoToken.IDENTIFICADOR, lexema, fila, columna);
