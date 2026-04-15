@@ -1,4 +1,3 @@
-package T1_Equipo_Desarrollo_de_Funciones.src;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import lexico.AnalizadorLexico;
-import lexico.LinkedList;
 import lexico.Nodo;
 import lexico.Token;
 import sintactico.AnalizadorSintactico;
@@ -22,7 +20,7 @@ public class AnalizadorSistemas {
         preprocesarArchivo(archivoEntrada, archivoSalida);
 
         // EJECUTAR ANALIZADOR LEXICO
-        LinkedList tabla = AnalizadorLexico.analizar(archivoSalida);
+        var tabla = AnalizadorLexico.analizar(archivoSalida);
 
         // MOSTRAR TABLA DE SIMBOLOS
         System.out.println("\n===== TABLA DE SIMBOLOS =====");
@@ -40,8 +38,18 @@ public class AnalizadorSistemas {
         }
         System.out.println("Total de tokens: " + tabla.count);
 
-        AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico();
-        analizadorSintactico.analizar(tabla);
+        AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico(AnalizadorLexico.tablaErrores);
+        sintactico.AbstractTree ast = analizadorSintactico.analizar(tabla);
+
+        if (!analizadorSintactico.getErrores().isEmpty()) {
+            System.out.println("\n===== ERRORES SINTACTICOS =====");
+            for (String e : analizadorSintactico.getErrores()) {
+                System.out.println(e);
+            }
+        } else {
+            System.out.println("\n===== AST =====");
+            ast.printTree();
+        }
 
         // MOSTRAR TABLA DE ERRORES
         AnalizadorLexico.tablaErrores.imprimir();
