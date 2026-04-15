@@ -1,3 +1,5 @@
+package T1_Equipo_Desarrollo_de_Funciones.src;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,6 +10,7 @@ import lexico.AnalizadorLexico;
 import lexico.LinkedList;
 import lexico.Nodo;
 import lexico.Token;
+import sintactico.AnalizadorSintactico;
 
 public class AnalizadorSistemas {
 
@@ -35,8 +38,10 @@ public class AnalizadorSistemas {
             System.out.println(tmp.data);
             tmp = tmp.obtenerSiguiente();
         }
-
         System.out.println("Total de tokens: " + tabla.count);
+
+        AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico();
+        analizadorSintactico.analizar(tabla);
 
         // MOSTRAR TABLA DE ERRORES
         AnalizadorLexico.tablaErrores.imprimir();

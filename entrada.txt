@@ -3,9 +3,10 @@
 
 entero main() {
     escribir("hola mundo");
-    entero x = 10;
+    flotante x = 5.67;
 
-    x++;
+    x += 1;
+    cadena nombre = "Juan Carlos Bodoque";
     si ( x == 5 ) {
         escribir("%d es mayor a 5", &x);
     }
