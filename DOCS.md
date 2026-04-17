@@ -31,7 +31,7 @@ Este proyecto implementa un compilador para un lenguaje personalizado inspirado 
 
 ```mermaid
 flowchart TB
-    subgraphEntrada["📁 Entrada"]
+    subgraph Entrada["📁 Entrada"]
         A[entrada.c]
     end
     
