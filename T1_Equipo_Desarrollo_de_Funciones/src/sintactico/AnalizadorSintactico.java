@@ -159,7 +159,7 @@ public class AnalizadorSintactico {
                 agregarErrorSintactico("bloque '{...}' con contenido", peek() != null ? peek().lexema : null);
             }
             return new NodoAST("FUNCION_MAIN", bloque, null);
-        }
+        } 
 
         if (id.tipo != TipoToken.IDENTIFICADOR) {
             agregarErrorSintactico("identificador", id.lexema);
@@ -169,6 +169,7 @@ public class AnalizadorSintactico {
 
         NodoAST nodoId = new NodoAST("ID", id.lexema);
         nodoId.token = id;
+        String nombre = id.lexema; 
 
         NodoAST valor = null;
         if (
@@ -182,6 +183,42 @@ public class AnalizadorSintactico {
                 agregarErrorSintactico("expresion", peek() != null ? peek().lexema : null);
             }
             nodoId.hijo = valor;
+        } else {
+            next();
+            // if (peek() == null || !peek().lexema.equals("(")) {
+            //     agregarErrorSintactico("'('", peek() != null ? peek().lexema : null);
+            //     return new NodoAST("Funcion" + nombre);
+            // }
+            // next();
+            // while (peek() != null && !peek().lexema.equals(")")) next();
+            // if (peek() == null) {
+            //     agregarErrorSintactico("')'", null);
+            //     return new NodoAST("Funcion" + nombre);
+            // }
+            next();
+            NodoAST bloque = bloque();
+            if (bloque == null || (bloque.hijo == null && bloque != null)) {
+                agregarErrorSintactico("bloque '{...}' con contenido", peek() != null ? peek().lexema : null);
+            }
+
+            return new NodoAST("Funcion" + nombre, bloque, null);           
+            // if (peek() == null || peek().lexema != "(" ) {
+            //     agregarErrorSintactico("'('", peek() != null ? peek().lexema : null);
+            //     return new NodoAST("Funcion" + peek().lexema);
+            // }
+            // next();
+            // while (peek() != null && !peek().lexema.equals(")")) next();
+            // if (peek() == null) {
+            //     agregarErrorSintactico("')'", null);
+            //     return new NodoAST("Funcion" + peek().lexema);
+            // }
+            // next();
+            // NodoAST bloque = bloque();
+            // if (bloque == null || (bloque.hijo == null && bloque != null)) {
+            //     agregarErrorSintactico("bloque '{...}' con contenido", peek() != null ? peek().lexema : null);
+            // }
+            // return new NodoAST("Funcion" + peek().lexema, bloque, null);
+
         }
 
         if (peek() != null && peek().lexema.equals(";")) {

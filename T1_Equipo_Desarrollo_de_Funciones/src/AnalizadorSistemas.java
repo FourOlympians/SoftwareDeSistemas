@@ -13,7 +13,7 @@ import sintactico.AnalizadorSintactico;
 public class AnalizadorSistemas {
 
     public static void main(String[] args) {
-        String archivoEntrada = "entrada.txt";
+        String archivoEntrada = "entrada.c";
         String archivoSalida = "salida_limpia.txt";
 
         // PREPROCESAR ARCHIVO (quita comentarios y espacios)

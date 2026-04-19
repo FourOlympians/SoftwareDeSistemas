@@ -1,0 +1,16 @@
+
+entero Saludar() {
+	escribir("Hola que tal!");
+}
+
+entero main() {
+    flotante x = 5.67;
+
+    x += 1;
+    cadena nombre = "Juan Carlos Bodoque";
+    si (x > 10) {
+        escribir("%d es mayor a 5", &x);
+        // Saludar();
+        // escribir(nombre);
+    }
+}
