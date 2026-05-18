@@ -9,6 +9,7 @@ import lexico.AnalizadorLexico;
 import lexico.Nodo;
 import lexico.Token;
 import sintactico.AnalizadorSintactico;
+import semantico.AnalizadorSemantico;
 
 public class AnalizadorSistemas {
 
@@ -49,6 +50,12 @@ public class AnalizadorSistemas {
         } else {
             System.out.println("\n===== AST =====");
             ast.printTree();
+        }
+
+        if (analizadorSintactico.getErrores().isEmpty()) {
+            AnalizadorSemantico semantico = new AnalizadorSemantico();
+            semantico.analizar(ast.raiz);
+            semantico.imprimirResultados();
         }
 
         // MOSTRAR TABLA DE ERRORES
