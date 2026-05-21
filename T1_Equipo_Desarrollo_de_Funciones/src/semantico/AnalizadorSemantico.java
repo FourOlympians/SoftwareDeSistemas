@@ -5,23 +5,37 @@ import sintactico.NodoAST;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Analizador semántico que recorre el AST y verifica:
- *  - Variables declaradas antes de usarse
- *  - Variables no redeclaradas en el mismo alcance
- *  - Compatibilidad de tipos en asignaciones y operaciones (TypeEqual)
- *  - Inferencia del tipo de una expresión (GetType)
- */
 public class AnalizadorSemantico {
 
     private TablaSimbolos alcanceActual;
     private final List<String> errores;
     private final List<String> advertencias;
+    private final List<EntradaTabla> tablaGlobal; // tabla de simbolos completa
+
+    // Registro completo de cada simbolo para imprimir al final
+    private static class EntradaTabla {
+        String nombre;
+        TipoSemantico tipo;
+        int nivel;         // nivel de alcance (0 = global, 1 = main, 2 = bloque interno, ...)
+        int fila;
+        int columna;
+        String valorInicial; // null si no tiene valor inicial
+
+        EntradaTabla(String nombre, TipoSemantico tipo, int nivel, int fila, int columna, String valorInicial) {
+            this.nombre       = nombre;
+            this.tipo         = tipo;
+            this.nivel        = nivel;
+            this.fila         = fila;
+            this.columna      = columna;
+            this.valorInicial = valorInicial;
+        }
+    }
 
     public AnalizadorSemantico() {
-        this.alcanceActual = new TablaSimbolos(null); // alcance global
+        this.alcanceActual = new TablaSimbolos(null);
         this.errores       = new ArrayList<>();
         this.advertencias  = new ArrayList<>();
+        this.tablaGlobal   = new ArrayList<>();
     }
 
     // ------------------------------------------------------------------
@@ -47,7 +61,7 @@ public class AnalizadorSemantico {
 
             case "FUNCION_MAIN":
                 alcanceActual = alcanceActual.abrirAlcance();
-                visitarNodo(nodo.hijo);     // el BLOQUE
+                visitarNodo(nodo.hijo);
                 alcanceActual = alcanceActual.cerrarAlcance();
                 break;
 
@@ -78,12 +92,10 @@ public class AnalizadorSemantico {
                 break;
 
             default:
-                // nodos de expresión los maneja GetType cuando se necesitan
                 break;
         }
     }
 
-    /** Recorre la lista de hermanos (nodos al mismo nivel). */
     private void visitarHermanos(NodoAST primero) {
         NodoAST actual = primero;
         while (actual != null) {
@@ -99,7 +111,6 @@ public class AnalizadorSemantico {
     private void visitarDeclaracion(NodoAST nodo) {
         TipoSemantico tipoDeclarado = tipoDesdeNodo(nodo.tipo);
 
-        // nodo.hijo es el ID
         NodoAST nodoId = nodo.hijo;
         if (nodoId == null || nodoId.valor == null) return;
 
@@ -107,33 +118,36 @@ public class AnalizadorSemantico {
         int fila      = (nodoId.token != null) ? nodoId.token.fila    : -1;
         int columna   = (nodoId.token != null) ? nodoId.token.columna : -1;
 
-        // Verificar redeclaración en este alcance
         boolean ok = alcanceActual.declarar(nombre, tipoDeclarado, fila, columna);
         if (!ok) {
             errores.add(String.format(
-                "[Semántico] Redeclaración: '%s' ya fue declarada en este alcance (%d:%d)",
-                nombre, fila, columna));
+                    "[Semántico] Redeclaración: '%s' ya fue declarada en este alcance (%d:%d)",
+                    nombre, fila, columna));
             return;
         }
 
-        // Si hay valor inicial, verificar compatibilidad de tipos
-        NodoAST valorInicial = nodoId.hijo;
-        if (valorInicial != null) {
-            TipoSemantico tipoValor = getType(valorInicial);
+        // Extraer valor inicial si existe (es el hijo del nodo ID)
+        NodoAST valorNodo = nodoId.hijo;
+        String valorStr = null;
+        if (valorNodo != null) {
+            valorStr = valorNodo.valor != null ? valorNodo.valor : valorNodo.tipo;
+            TipoSemantico tipoValor = getType(valorNodo);
             if (!typeEqual(tipoDeclarado, tipoValor)) {
                 errores.add(String.format(
-                    "[Semántico] Tipos incompatibles: '%s' es %s pero se asigna valor de tipo %s (%d:%d)",
-                    nombre, tipoDeclarado, tipoValor, fila, columna));
+                        "[Semántico] Tipos incompatibles: '%s' es %s pero se asigna valor de tipo %s (%d:%d)",
+                        nombre, tipoDeclarado, tipoValor, fila, columna));
             }
         }
+
+        // Registrar en la tabla global con todos los datos
+        tablaGlobal.add(new EntradaTabla(nombre, tipoDeclarado, alcanceActual.getNivel(), fila, columna, valorStr));
     }
 
     // ------------------------------------------------------------------
-    //  Asignación  x = expr  /  x += expr  etc.
+    //  Asignación
     // ------------------------------------------------------------------
 
     private void visitarAsignacion(NodoAST nodo) {
-        // Estructura: ASIGNACION -> hijo=ID  (el ID tiene hijo=valor o el sig es OP_*)
         NodoAST nodoId = nodo.hijo;
         if (nodoId == null || nodoId.valor == null) return;
 
@@ -144,20 +158,18 @@ public class AnalizadorSemantico {
         EntradaSimbolo simbolo = alcanceActual.buscar(nombre);
         if (simbolo == null) {
             errores.add(String.format(
-                "[Semántico] Variable no declarada: '%s' (%d:%d)",
-                nombre, fila, columna));
+                    "[Semántico] Variable no declarada: '%s' (%d:%d)",
+                    nombre, fila, columna));
             return;
         }
 
-        // El valor puede estar en nodoId.hijo (asignación simple)
-        // o en nodo.sig si viene de una operación compuesta
         NodoAST expr = nodoId.hijo != null ? nodoId.hijo : nodo.sig;
         if (expr != null) {
             TipoSemantico tipoExpr = getType(expr);
             if (!typeEqual(simbolo.tipo, tipoExpr)) {
                 errores.add(String.format(
-                    "[Semántico] Tipos incompatibles en asignación: '%s' es %s pero expresión es %s (%d:%d)",
-                    nombre, simbolo.tipo, tipoExpr, fila, columna));
+                        "[Semántico] Tipos incompatibles en asignación: '%s' es %s pero expresión es %s (%d:%d)",
+                        nombre, simbolo.tipo, tipoExpr, fila, columna));
             }
         }
     }
@@ -167,13 +179,11 @@ public class AnalizadorSemantico {
     // ------------------------------------------------------------------
 
     private void visitarEscribir(NodoAST nodo) {
-        // Verificamos que cada argumento sea una expresión válida
-        NodoAST args = nodo.hijo;   // nodo ARGUMENTOS
+        NodoAST args = nodo.hijo;
         if (args == null) return;
 
         NodoAST arg = args.hijo;
         while (arg != null) {
-            // Sólo verificamos que los identificadores usados existan
             verificarUsoDeVariables(arg);
             arg = arg.sig;
         }
@@ -189,11 +199,10 @@ public class AnalizadorSemantico {
 
         if (condicion != null) {
             verificarUsoDeVariables(condicion);
-            // La condición debería ser booleana o comparación numérica
             TipoSemantico tipoCond = getType(condicion);
             if (tipoCond == TipoSemantico.CADENA) {
-                advertencias.add(String.format(
-                    "[Semántico] Advertencia: condición de 'si' con tipo CADENA — puede ser error lógico"));
+                advertencias.add(
+                        "[Semántico] Advertencia: condición de 'si' con tipo CADENA — puede ser error lógico");
             }
         }
 
@@ -201,52 +210,39 @@ public class AnalizadorSemantico {
     }
 
     // ------------------------------------------------------------------
-    //  GetType — infiere el tipo de una expresión
+    //  GetType
     // ------------------------------------------------------------------
 
-    /**
-     * Infiere el tipo semántico de un nodo de expresión.
-     * Implementa el algoritmo GetType del análisis semántico clásico.
-     */
     public TipoSemantico getType(NodoAST nodo) {
         if (nodo == null) return TipoSemantico.DESCONOCIDO;
 
         switch (nodo.tipo) {
-            case "NUMERO": {
-                // Si contiene punto es flotante, si no es entero
+            case "NUMERO":
                 if (nodo.valor != null && nodo.valor.contains("."))
                     return TipoSemantico.FLOTANTE;
                 return TipoSemantico.ENTERO;
-            }
 
             case "CADENA":
                 return TipoSemantico.CADENA;
 
             case "ID": {
                 EntradaSimbolo simbolo = alcanceActual.buscar(nodo.valor);
-                if (simbolo == null) {
-                    // El error de variable no declarada se reporta en visitarAsignacion
-                    // Aquí sólo devolvemos DESCONOCIDO para no duplicar mensajes
-                    return TipoSemantico.DESCONOCIDO;
-                }
+                if (simbolo == null) return TipoSemantico.DESCONOCIDO;
                 return simbolo.tipo;
             }
 
             case "REF": {
-                // &x — misma búsqueda que ID
                 EntradaSimbolo simbolo = alcanceActual.buscar(nodo.valor);
                 if (simbolo == null) return TipoSemantico.DESCONOCIDO;
                 return simbolo.tipo;
             }
 
-            // Operaciones aritméticas: el tipo resulta del operando de mayor precedencia
             case "OP_+": case "OP_-": case "OP_*": case "OP_/": {
                 TipoSemantico izq = getType(nodo.hijo);
                 TipoSemantico der = getType(nodo.sig);
                 return promoverTipo(izq, der);
             }
 
-            // Comparaciones siempre producen un booleano
             case "OP_>": case "OP_<":
             case "OP_>=": case "OP_<=":
             case "OP_==": case "OP_!=":
@@ -259,28 +255,15 @@ public class AnalizadorSemantico {
     }
 
     // ------------------------------------------------------------------
-    //  TypeEqual — verifica compatibilidad de tipos
+    //  TypeEqual
     // ------------------------------------------------------------------
 
-    /**
-     * Comprueba si dos tipos son compatibles para una asignación.
-     * Implementa el algoritmo TypeEqual del análisis semántico clásico.
-     *
-     * Reglas de compatibilidad:
-     *  - Mismo tipo siempre es válido.
-     *  - ENTERO se puede asignar a FLOTANTE (promoción implícita).
-     *  - Todo lo demás es incompatible.
-     */
     public boolean typeEqual(TipoSemantico esperado, TipoSemantico actual) {
         if (esperado == TipoSemantico.DESCONOCIDO || actual == TipoSemantico.DESCONOCIDO)
-            return true;   // ya hay otro error reportado, no duplicamos
-
+            return true;
         if (esperado == actual) return true;
-
-        // Promoción implícita: int → float
         if (esperado == TipoSemantico.FLOTANTE && actual == TipoSemantico.ENTERO)
             return true;
-
         return false;
     }
 
@@ -288,7 +271,6 @@ public class AnalizadorSemantico {
     //  Helpers
     // ------------------------------------------------------------------
 
-    /** Convierte el string del tipo de nodo AST al enum TipoSemantico. */
     private TipoSemantico tipoDesdeNodo(String tipoNodo) {
         switch (tipoNodo) {
             case "DECLARACION_ENTERO":   return TipoSemantico.ENTERO;
@@ -300,10 +282,6 @@ public class AnalizadorSemantico {
         }
     }
 
-    /**
-     * Regla de promoción de tipo para operaciones binarias.
-     * FLOTANTE tiene mayor precedencia que ENTERO.
-     */
     private TipoSemantico promoverTipo(TipoSemantico a, TipoSemantico b) {
         if (a == TipoSemantico.FLOTANTE || b == TipoSemantico.FLOTANTE)
             return TipoSemantico.FLOTANTE;
@@ -312,7 +290,6 @@ public class AnalizadorSemantico {
         return TipoSemantico.DESCONOCIDO;
     }
 
-    /** Recorre un subárbol buscando IDs no declarados (sin cambiar el tipo). */
     private void verificarUsoDeVariables(NodoAST nodo) {
         if (nodo == null) return;
 
@@ -321,8 +298,8 @@ public class AnalizadorSemantico {
                 int fila    = (nodo.token != null) ? nodo.token.fila    : -1;
                 int columna = (nodo.token != null) ? nodo.token.columna : -1;
                 errores.add(String.format(
-                    "[Semántico] Variable no declarada: '%s' (%d:%d)",
-                    nodo.valor, fila, columna));
+                        "[Semántico] Variable no declarada: '%s' (%d:%d)",
+                        nodo.valor, fila, columna));
             }
         }
 
@@ -341,7 +318,30 @@ public class AnalizadorSemantico {
 
     public void imprimirResultados() {
         System.out.println("\n===== TABLA DE SIMBOLOS (SEMANTICO) =====");
-        alcanceActual.imprimir();
+
+        if (tablaGlobal.isEmpty()) {
+            System.out.println("  (vacío)");
+        } else {
+            // Encabezado
+            System.out.printf("%-5s  %-15s  %-12s  %-7s  %-6s  %-7s  %-20s%n",
+                    "No.", "NOMBRE", "TIPO", "ALCANCE", "FILA", "COLUMNA", "VALOR INICIAL");
+            System.out.println("-".repeat(80));
+
+            // Filas
+            int num = 1;
+            for (EntradaTabla e : tablaGlobal) {
+                System.out.printf("%-5d  %-15s  %-12s  %-7d  %-6d  %-7d  %-20s%n",
+                        num++,
+                        e.nombre,
+                        e.tipo,
+                        e.nivel,
+                        e.fila,
+                        e.columna,
+                        e.valorInicial != null ? e.valorInicial : "—");
+            }
+            System.out.println("-".repeat(80));
+            System.out.println("Total de simbolos: " + tablaGlobal.size());
+        }
 
         System.out.println("\n========== TABLA DE ERRORES SEMANTICOS ==========");
         if (errores.isEmpty() && advertencias.isEmpty()) {
