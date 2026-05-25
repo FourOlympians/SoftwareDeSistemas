@@ -6,14 +6,14 @@ import java.util.Map;
 /**
  * Tabla de símbolos con soporte de alcances (scopes).
  *
- * Funciona como una pila: cada vez que entramos a un bloque
- * abrimos un nuevo alcance, y al salir lo cerramos.
- * La búsqueda sube por la cadena de padres hasta encontrar la variable.
+ * Cada vez que entramos a un bloque abrimos un nuevo alcance,
+ * y al salir lo cerramos. La búsqueda sube por la cadena de
+ * padres hasta encontrar la variable.
  */
 public class TablaSimbolos {
 
     private final Map<String, EntradaSimbolo> simbolos;
-    private final TablaSimbolos padre;   // alcance que nos contiene
+    private final TablaSimbolos padre;
     private final int nivel;
 
     public TablaSimbolos(TablaSimbolos padre) {
@@ -34,11 +34,14 @@ public class TablaSimbolos {
 
     /**
      * Declara una variable en el alcance actual.
+     *
+     * @param inicializada true si la declaración incluye valor (entero x = 5),
+     *                     false si es solo declaración (entero x;)
      * @return false si ya existía en ESTE alcance (redeclaración).
      */
-    public boolean declarar(String nombre, TipoSemantico tipo, int fila, int columna) {
+    public boolean declarar(String nombre, TipoSemantico tipo, int fila, int columna, boolean inicializada) {
         if (simbolos.containsKey(nombre)) return false;
-        simbolos.put(nombre, new EntradaSimbolo(nombre, tipo, fila, columna));
+        simbolos.put(nombre, new EntradaSimbolo(nombre, tipo, fila, columna, inicializada));
         return true;
     }
 
@@ -53,7 +56,19 @@ public class TablaSimbolos {
         return null;
     }
 
-    /** Imprime el contenido de este alcance (no los padres). */
+    /**
+     * Marca una variable como inicializada (después de una asignación).
+     * Sube por la cadena de alcances igual que buscar().
+     */
+    public void marcarInicializada(String nombre) {
+        EntradaSimbolo entrada = simbolos.get(nombre);
+        if (entrada != null) {
+            entrada.inicializada = true;
+            return;
+        }
+        if (padre != null) padre.marcarInicializada(nombre);
+    }
+
     public void imprimir() {
         if (simbolos.isEmpty()) {
             System.out.println("  (vacío)");
